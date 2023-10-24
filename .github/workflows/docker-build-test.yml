@@ -1,0 +1,31 @@
+name: Docker Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+      - docker_ghactions
+
+jobs:
+  run:
+    name: Docker Build and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the branch
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+          cache: 'pip'
+      - name: Start Docker container
+        run: docker-compose up -d
+      - name: Wait for container to start
+        run: sleep 10
+      - name: Run unit tests
+        run: docker exec -it ct-server python manage.py test
+      - name: Stop and clean up
+        run: docker-compose down
